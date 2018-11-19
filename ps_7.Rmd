@@ -1,0 +1,31 @@
+---
+title: "ps_7"
+author: "Hannah Hardenbergh"
+date: "November 19, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(janitor)
+library(fs)
+library(knitr)
+library(tidyverse)
+
+
+# code used from midterm 1 to download Upshot data
+download.file(url = "https://goo.gl/ZRCBda",
+              destfile = "master.zip",
+              quiet = TRUE,
+              mode = "wb")
+
+
+unzip("master.zip")
+
+
+x <- fs::dir_ls("2018-live-poll-results-master/data") %>%
+  map_dfr(read_csv, .id = "source")
+
+```
+
