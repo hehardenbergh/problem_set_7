@@ -9,7 +9,8 @@ raw_JS <- read_csv("mt_2_results.csv")
 tidy_data_JS <- raw_JS %>% 
   filter(!(district %in% c("sen", "gov"))) %>% 
   mutate(key = paste(state, district, sep = "-"))
-
+# create rds file
+write_rds(tidy_data_JS, "tidy_data_JS.rds")
 
 # download upshot data from internt
 download.file(url = "https://goo.gl/ZRCBda",
@@ -32,3 +33,5 @@ tidy_upshot <- raw_upshot %>%
   mutate(state = toupper(str_sub(source, 51L, 52L)),
          district = str_sub(source, 53L, 54L),
          key = paste(state, district, sep = "-"))
+# create rds file
+write_rds(tidy_upshot, "tidy_upshot.rds")
