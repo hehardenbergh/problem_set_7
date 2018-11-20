@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+
+# Added files
+*.Rproj
+2018-live-poll-results-master/
