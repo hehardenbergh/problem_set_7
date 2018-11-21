@@ -16,7 +16,7 @@ shiny_data <- read_rds("final_shiny_data.rds")
 ui <- fluidPage(
   
   # App title ----
-  titlePanel("2018 Midterm Election Results vs. Forecasts"),
+  titlePanel("2018 Midterm Election Results vs. Forecasts with Regression Tables"),
   
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -99,21 +99,21 @@ server <- function(input, output) {
     
     # use if statement to create different plots for with and without linear model selection
     if(input$line == TRUE) {
-        ggplot(plot_data, aes_string(x = input$x, y = input$y)) +
+        ggplot(plot_data, aes_string(x = input$x, y = input$y, color = input$y)) +
         geom_point() +
         geom_smooth(method="lm", se=FALSE) +
         labs(x = "Selected X-Value (Percentage)",
              y = "Selected Y-Value",
-             title = "Predicted vs. Actual Republican Advantage in U.S. 2018 Midterm Election",
-             subtitle = "Calculated by dividing the difference between Republican and Democrat votes by total votes cast")
+             title = "Predicted or Actual Democratic Advantage in U.S. 2018 Midterm Election Compared to Various District Demographic Statistics",
+             subtitle = "Calculated by dividing the difference between Democrat and Republican votes by total votes cast")
     }
     else{
-      ggplot(plot_data, aes_string(x = input$x, y = input$y)) +
+      ggplot(plot_data, aes_string(x = input$x, y = input$y, color = input$y)) +
         geom_point() +
         labs(x = "Selected X-Value (Percentage)",
              y = "Selected Y-Value",
-             title = "Predicted vs. Actual Republican Advantage in U.S. 2018 Midterm Election",
-             subtitle = "Calculated by dividing the difference between Republican and Democrat votes by total votes cast")
+             title = "Predicted or Actual Democratic Advantage in U.S. 2018 Midterm Election Compared to Various District Demographic Statistics",
+             subtitle = "Calculated by dividing the difference between Democrat and Republican votes by total votes cast")
     }
     })
    
