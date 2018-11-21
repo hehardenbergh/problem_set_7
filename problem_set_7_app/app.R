@@ -24,6 +24,7 @@ ui <- fluidPage(
                               "Senate" = "sen",
                               "Governor" = "gov"),
                   multiple = TRUE),
+      checkboxInput("line", label = "Add linear model"),
       
       
       # br() element to introduce extra vertical spacing ----
@@ -69,17 +70,27 @@ server <- function(input, output) {
   # both tracked, and all expressions are called in the sequence
   # implied by the dependency graph.
   output$plot <- renderPlot({
-    
-    shiny_data %>%
-      filter(position %in% input$type) %>% 
-      ggplot(aes(x = predicted_rep_advantage, y = actual_rep_advantage)) +
-      geom_point() +
-      geom_smooth(method="lm", se=FALSE) +
-      labs(x = "Predicted",
-           y = "Actual",
-           title = "Predicted vs. Actual Republican Advantage in U.S. 2018 Midterm Election",
-           subtitle = "Calculated by dividing the difference between Republican and Democrat votes by total votes cast")
-    
+    if(input$line == TRUE) {
+      shiny_data %>%
+        filter(position %in% input$type) %>% 
+        ggplot(aes(x = predicted_rep_advantage, y = actual_rep_advantage)) +
+        geom_point() +
+        geom_smooth(method="lm", se=FALSE) +
+        labs(x = "Predicted",
+             y = "Actual",
+             title = "Predicted vs. Actual Republican Advantage in U.S. 2018 Midterm Election",
+            subtitle = "Calculated by dividing the difference between Republican and Democrat votes by total votes cast")
+    }
+    else{
+      shiny_data %>%
+        filter(position %in% input$type) %>% 
+        ggplot(aes(x = predicted_rep_advantage, y = actual_rep_advantage)) +
+        geom_point() +
+        labs(x = "Predicted",
+             y = "Actual",
+             title = "Predicted vs. Actual Republican Advantage in U.S. 2018 Midterm Election",
+             subtitle = "Calculated by dividing the difference between Republican and Democrat votes by total votes cast")
+    }
   })
   
   # Generate a summary of the data ----

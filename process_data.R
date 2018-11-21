@@ -8,7 +8,8 @@ raw_JS <- read_csv("mt_2_results.csv")
 # tidy the JS data
 tidy_data_JS <- raw_JS %>% 
   filter(!(district %in% c("sen", "gov"))) %>% 
-  mutate(key = paste(state, district, sep = "-"))
+  mutate(key = paste(state, district, sep = "-"),
+         actual_dem_advantage = (dem_votes - rep_votes)/(dem_votes + rep_votes + other_votes))
 # create rds file
 write_rds(tidy_data_JS, "tidy_data_JS.rds")
 
@@ -32,6 +33,15 @@ tidy_upshot <- raw_upshot %>%
          str_sub(source, 56L, 56L) == "3") %>% 
   mutate(state = toupper(str_sub(source, 51L, 52L)),
          district = str_sub(source, 53L, 54L),
-         key = paste(state, district, sep = "-"))
+         key = paste(state, district, sep = "-")) %>% 
+  # select important variables for final output
+  select(key, district, state, response, final_weight) %>% 
+  group_by(key, response) %>% 
+  # count the data with final_weight as weight
+  tally(wt = final_weight) %>% 
+  # spread the data by response
+  spread(key = "response", value = "n", fill = 0) %>% 
+  # create republican advantage variable
+  mutate(poll_dem_advantage = (Dem - Rep) / (`3` + `4` + `5` + `6` + Rep + Dem + Und))
 # create rds file
 write_rds(tidy_upshot, "tidy_upshot.rds")
