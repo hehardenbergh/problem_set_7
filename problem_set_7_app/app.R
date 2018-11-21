@@ -3,7 +3,7 @@ library(tidyverse)
 library(knitr)
 library(scales)
 
-shiny_data <- read_rds("shiny_data.rds")
+shiny_data <- read_rds("final_shiny_data.rds")
 
 # Define UI for random distribution app ----
 ui <- fluidPage(
@@ -17,35 +17,29 @@ ui <- fluidPage(
     # Sidebar panel for inputs ----
     sidebarPanel(
       
-      # Input: menu for the number of observations to generate ----
-      selectInput("type",
-                  "Race Type (for Plot Tab):",
-                  choices = c("House of Representatives" = "rep",
-                              "Senate" = "sen",
-                              "Governor" = "gov"),
+      # Input: drop-down menu to display observations  ----
+      selectInput("x",
+                  "X-axis:",
+                   choices = c(`Percent Female` = "pct_female", 
+                              `Percent White` = "pct_white", 
+                              `Percent Likely to Vote` = "pct_likely", 
+                              `Percent with a College Degree` = "pct_college", 
+                              `Percent Undecided Voters` = "pct_und", 
+                              `Percent Millenials` = "pct_mil"),
+                  "y",
+                  "Y-axis:",
+                  choices = c(`Predicted Democratic Advantage` = "poll_dem_advantage",
+                              `Actual Democratic Advantage` = "actual_dem_advantage"),
                   multiple = TRUE),
+      
       checkboxInput("line", label = "Add linear model"),
+      htmlOutput("see_table"),
+      htmlOutput("regression_table"),
       
       
       # br() element to introduce extra vertical spacing ----
       br(),
-      
-      # Input: Select the random distribution type ----
-      radioButtons("data", 
-                   "Information Source (for Summary Tab):",
-                   c("Results" = "actual_rep_advantage",
-                     "Polls" = "predicted_rep_advantage")),
-      
-      # br() element to introduce extra vertical spacing ----
-      br(),
-      
-      # Input: menu for the number of observations to generate ----
-      sliderInput("observations",
-                  "Number of Observations Type (for Table Tab):",
-                  min = 1,
-                  max = 66,
-                  value = 10)
-      
+  
     ),
     
     # Main panel for displaying outputs ----
@@ -54,8 +48,8 @@ ui <- fluidPage(
       # Output: Tabset w/ plot, summary, and table ----
       tabsetPanel(type = "tabs",
                   tabPanel("Plot", plotOutput("plot")),
-                  tabPanel("Summary", verbatimTextOutput("summary")),
-                  tabPanel("Table", tableOutput("table"))
+                  tabPanel("Polled Democratic advantage", verbatimTextOutput("summary")),
+                  tabPanel("actual Democratic advantage", tableOutput("table"))
       )
     )
   )
@@ -92,7 +86,14 @@ server <- function(input, output) {
              subtitle = "Calculated by dividing the difference between Republican and Democrat votes by total votes cast")
     }
   })
-  
+   
+  # display regression table
+  output$regression_table <- renderUI({
+    filteredData <- reactive ({
+      df <- app_data[app_data$state %in% input$state,]
+    })
+    
+    
   # Generate a summary of the data ----
   output$summary <- renderPrint({
     
@@ -106,13 +107,7 @@ server <- function(input, output) {
   output$table <- renderTable({
     
     shiny_data %>% 
-      mutate(actual_rep_advantage = percent(actual_rep_advantage),
-             predicted_rep_advantage = percent(predicted_rep_advantage)) %>% 
-      rename("Race" = "race", 
-             "Results" = "actual_rep_advantage", 
-             "Forecast" = "predicted_rep_advantage", 
-             "Position" = "position") %>% 
-      head(input$observations)
+       
     
   })
   

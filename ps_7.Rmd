@@ -1,6 +1,6 @@
 ---
 title: "ps_7"
-author: "Hannah Hardenbergh"
+author: "Hannah Hardenbergh, Dillon Smith, Jack Luby, Ethan McCollister"
 date: "November 19, 2018"
 output: html_document
 ---
@@ -23,8 +23,10 @@ download.file(url = "https://goo.gl/ZRCBda",
 
 unzip("master.zip")
 
+file_delete("master.zip") 
 
-x <- fs::dir_ls("2018-live-poll-results-master/data") %>%
+# map together all polling results to one dataframe
+raw_names <- fs::dir_ls("2018-live-poll-results-master/data") %>%
   map_dfr(read_csv, .id = "source")
 
 ```
