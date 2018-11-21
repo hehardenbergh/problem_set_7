@@ -4,7 +4,7 @@ library(knitr)
 library(scales)
 
 shiny_data <- read_rds("final_shiny_data.rds")
-
+shiny_states <- read_rds("shiny_states.rds")
 # Define UI for random distribution app ----
 ui <- fluidPage(
   
@@ -25,12 +25,15 @@ ui <- fluidPage(
                               `Percent Likely to Vote` = "pct_likely", 
                               `Percent with a College Degree` = "pct_college", 
                               `Percent Undecided Voters` = "pct_und", 
-                              `Percent Millenials` = "pct_mil"),
-                  "y",
+                              `Percent Millenials` = "pct_mil")),
+      selectInput("y",
                   "Y-axis:",
                   choices = c(`Predicted Democratic Advantage` = "poll_dem_advantage",
                               `Actual Democratic Advantage` = "actual_dem_advantage"),
                   multiple = TRUE),
+      selectInput("state",
+                  "State(s)",
+                  choices = names(shiny_states)),
       
       checkboxInput("line", label = "Add linear model"),
       htmlOutput("see_table"),
@@ -38,7 +41,7 @@ ui <- fluidPage(
       
       
       # br() element to introduce extra vertical spacing ----
-      br(),
+    #  br(),
   
     ),
     
@@ -48,8 +51,8 @@ ui <- fluidPage(
       # Output: Tabset w/ plot, summary, and table ----
       tabsetPanel(type = "tabs",
                   tabPanel("Plot", plotOutput("plot")),
-                  tabPanel("Polled Democratic advantage", verbatimTextOutput("summary")),
-                  tabPanel("actual Democratic advantage", tableOutput("table"))
+                  tabPanel("Polled Democratic Advantage", verbatimTextOutput("summary")),
+                  tabPanel("Actual Democratic Advantage", tableOutput("table"))
       )
     )
   )
@@ -66,7 +69,8 @@ server <- function(input, output) {
   output$plot <- renderPlot({
     if(input$line == TRUE) {
       shiny_data %>%
-        filter(position %in% input$type) %>% 
+        filter(position %in% input$type) %>%
+        filter(state %in% state.abb[match(input$state,state.name)]) %>%
         ggplot(aes(x = predicted_rep_advantage, y = actual_rep_advantage)) +
         geom_point() +
         geom_smooth(method="lm", se=FALSE) +
@@ -78,6 +82,7 @@ server <- function(input, output) {
     else{
       shiny_data %>%
         filter(position %in% input$type) %>% 
+        filter(state %in% state.abb[match(input$state,state.name)]) %>%
         ggplot(aes(x = predicted_rep_advantage, y = actual_rep_advantage)) +
         geom_point() +
         labs(x = "Predicted",
@@ -87,29 +92,29 @@ server <- function(input, output) {
     }
   })
    
-  # display regression table
-  output$regression_table <- renderUI({
-    filteredData <- reactive ({
-      df <- app_data[app_data$state %in% input$state,]
-    })
-    
-    
-  # Generate a summary of the data ----
-  output$summary <- renderPrint({
-    
-    shiny_data %>% 
-      select(input$data) %>% 
-      summary()
-    
-  })
+  # # display regression table
+  # output$regression_table <- renderUI({
+  #   filteredData <- reactive ({
+  #     df <- app_data[app_data$state %in% input$state,]
+  #   })
+  #   
+  #   
+  # # Generate a summary of the data ----
+  # output$summary <- renderPrint({
+  #   
+  #   shiny_data %>% 
+  #     select(input$data) %>% 
+  #     summary()
+  #   
+  # })
   
-  # Generate an HTML table view of the data ----
-  output$table <- renderTable({
-    
-    shiny_data %>% 
-       
-    
-  })
+  # # Generate an HTML table view of the data ----
+  # output$table <- renderTable({
+  #   
+  #   shiny_data %>% 
+  #      
+  #   
+  # })
   
 }
 
