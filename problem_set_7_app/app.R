@@ -24,7 +24,7 @@ ui <- fluidPage(
     # Sidebar panel for inputs ----
     sidebarPanel(
       
-      # Input: drop-down menu to display observations  ----
+      # Input: drop-down menu to display selections for x axis, y axis, and state  ----
       selectInput("x",
                   "X-axis:",
                    choices = c("Percent Female" = "pct_female", 
@@ -66,6 +66,7 @@ ui <- fluidPage(
                   options = list(`actions-box` = TRUE),
                   multiple = TRUE),
       
+      # create checkbox for linear model
       checkboxInput("line", label = "Add linear model")
   
     ),
@@ -73,7 +74,7 @@ ui <- fluidPage(
     # Main panel for displaying outputs ----
     mainPanel(
       
-      # Output: Tabset w/ plot, summary, and table ----
+      # Output: Tabset w/ plotand two tables ----
       tabsetPanel(type = "tabs",
                   tabPanel("Plot", plotOutput("plot")),
                   tabPanel("Polled Democratic Advantage", htmlOutput("polled")),
@@ -93,8 +94,10 @@ server <- function(input, output) {
   # implied by the dependency graph.
   output$plot <- renderPlot({
     
+    # filter data for selected states
     plot_data <- shiny_data %>% filter(state %in% input$state)
     
+    # use if statement to create different plots for with and without linear model selection
     if(input$line == TRUE) {
         ggplot(plot_data, aes_string(x = input$x, y = input$y)) +
         geom_point() +
@@ -128,7 +131,7 @@ server <- function(input, output) {
   })
   
   
-  # Generate a summary of the data ----
+  # display regression table
   output$actual <- renderUI({
   
     HTML(
