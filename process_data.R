@@ -75,18 +75,7 @@ final_shiny_data <- tidy_upshot %>%
   # select important variables
   select(key, state, district, poll_dem_advantage, actual_dem_advantage, pct_female, pct_white, pct_likely, pct_college, pct_und, pct_mil)
 
-# create dataframe of state names and abbreviations of those with data
-state_test <- data.frame(state_abb = state.abb, state_name = state.name)
-
-# use semi_join to filter for states thar are in our dataset
-shiny_states <- state_test %>%
-  semi_join(final_shiny_data, by = c( "state_abb" = "state")) %>%
-  # spread to use state names in shiny selectInput
-  spread(state_name, state_abb)
-
 # create rds file 
 write_rds(final_shiny_data, "final_shiny_data.rds")
 
-# Create rds file of states/state names 
-write_rds(shiny_states, "shiny_states.rds")
 
