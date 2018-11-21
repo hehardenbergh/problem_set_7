@@ -45,3 +45,20 @@ tidy_upshot <- raw_upshot %>%
   mutate(poll_dem_advantage = (Dem - Rep) / (`3` + `4` + `5` + `6` + Rep + Dem + Und))
 # create rds file
 write_rds(tidy_upshot, "tidy_upshot.rds")
+
+x_axis_upshot <- raw_upshot %>% 
+  filter(!(str_sub(source, 53L, 55L) %in% c("sen", "gov")), 
+         str_sub(source, 56L, 56L) == "3") %>% 
+  mutate(state = toupper(str_sub(source, 51L, 52L)),
+         district = str_sub(source, 53L, 54L),
+         key = paste(state, district, sep = "-")) %>% 
+  # select important variables for final output
+  select(key, response, educ4, ager, file_race, gender, likely, phone_type, final_weight) %>%
+  group_by(key) %>% 
+  summarize(pct_female = sum(gender == "Female")/n(),
+            pct_white = sum(file_race == "White")/n(),
+            pct_likely = sum(likely %in% c("Already voted", "Almost certain", "Very likely"))/n(),
+            pct_college = sum(educ4 %in% c("4-year College Grad.", "Postgraduate Degree"))/n(), 
+            pct_und = sum(response == "Und")/n(),
+            pct_mil = sum(ager == "18 to 34")/n())
+  
