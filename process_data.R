@@ -9,7 +9,7 @@ raw_JS <- read_csv("mt_2_results.csv")
 tidy_data_JS <- raw_JS %>% 
   filter(!(district %in% c("sen", "gov"))) %>% 
   mutate(key = paste(state, district, sep = "-"),
-         actual_dem_advantage = (dem_votes - rep_votes)/(dem_votes + rep_votes + other_votes))
+         actual_dem_advantage = round(100 * ((dem_votes - rep_votes)/(dem_votes + rep_votes + other_votes)), 1))
 
 # download upshot data from internt
 download.file(url = "https://goo.gl/ZRCBda",
@@ -44,7 +44,7 @@ tidy_upshot <- raw_upshot %>%
   # spread the data by response
   spread(key = "response", value = "n", fill = 0) %>% 
   # create republican advantage variable
-  mutate(poll_dem_advantage = (Dem - Rep) / (`3` + `4` + `5` + `6` + Rep + Dem + Und))
+  mutate(poll_dem_advantage = round(100 * ((Dem - Rep) / (`3` + `4` + `5` + `6` + Rep + Dem + Und)), 1))
 
 # create x axis variables
 x_axis_upshot <- raw_upshot %>% 
@@ -60,12 +60,12 @@ x_axis_upshot <- raw_upshot %>%
   # group data by key
   group_by(key) %>% 
   # create importnt variables
-  summarize(pct_female = sum(gender == "Female")/n(),
-            pct_white = sum(file_race == "White")/n(),
-            pct_likely = sum(likely %in% c("Already voted", "Almost certain", "Very likely"))/n(),
-            pct_college = sum(educ4 %in% c("4-year College Grad.", "Postgraduate Degree"))/n(), 
-            pct_und = sum(response == "Und")/n(),
-            pct_mil = sum(ager == "18 to 34")/n())
+  summarize(pct_female = round((sum(gender == "Female")/n()) * 100, 1),
+            pct_white = round((sum(file_race == "White")/n()) * 100, 1),
+            pct_likely = round((sum(likely %in% c("Already voted", "Almost certain", "Very likely"))/n()) * 100, 1),
+            pct_college = round((sum(educ4 %in% c("4-year College Grad.", "Postgraduate Degree"))/n()) * 100, 1), 
+            pct_und = round((sum(response == "Und")/n()) * 100, 1),
+            pct_mil = round((sum(ager == "18 to 34")/n()) * 100, 1))
 
 # create dataframe for shiny app
 final_shiny_data <- tidy_upshot %>% 
